@@ -34,6 +34,8 @@ public class Question {
     @Column(name = "question_explain")
     private String explain;
 
+    private Integer answer;
+
     @OneToMany(
             mappedBy = "question",
             fetch = FetchType.LAZY,
@@ -71,6 +73,10 @@ public class Question {
     }
     public void setChoices(List<Choice> choices) {
         this.choices = choices;
+    }
+
+    public void setAnswer(Integer answer){
+        this.answer = answer;
     }
 
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -17,12 +18,10 @@ public class MemberQuestion {
     private Long id;
 
     @Column(name = "question_success")
-    private int success;
+    private Boolean success;
 
-    @Column(name = "question_fail")
-    private int fail;
-
-    private Long solveTime;
+    private LocalDateTime solveTime;
+    private Integer choice;
 
     @ManyToOne(
             fetch = FetchType.LAZY,
@@ -40,16 +39,22 @@ public class MemberQuestion {
 
     @Builder
     public MemberQuestion(
-            int success,
-            int fail,
-            Long solveTime,
+            Boolean success,
+            Integer choice,
+            LocalDateTime solveTime,
             Member member,
             Question question
     ) {
+        this.choice = choice;
         this.success = success;
-        this.fail = fail;
         this.solveTime = solveTime;
         this.member = member;
         this.question = question;
+    }
+
+    public void changeAnswer(Boolean success, Integer choice, LocalDateTime solveTime){
+        this.success = success;
+        this.choice = choice;
+        this.solveTime = solveTime;
     }
 }

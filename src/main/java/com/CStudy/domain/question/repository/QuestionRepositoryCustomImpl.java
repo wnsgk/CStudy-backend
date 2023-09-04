@@ -6,6 +6,7 @@ import com.CStudy.domain.question.dto.request.QuestionSearchCondition;
 import com.CStudy.domain.question.dto.response.QQuestionPageWithCategoryAndTitle;
 import com.CStudy.domain.question.dto.response.QuestionPageWithCategoryAndTitle;
 import com.CStudy.domain.question.entity.Question;
+import com.CStudy.domain.workbook.dto.response.WorkbookResponseDto;
 import com.CStudy.global.util.LoginUserDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -40,15 +41,14 @@ public class QuestionRepositoryCustomImpl implements QuestionRepositoryCustom {
     }
 
     @Override
-    public Page<QuestionPageWithCategoryAndTitle> findQuestionPageWithCategory(Pageable pageable, QuestionSearchCondition questionSearchCondition, LoginUserDto loginUserDto) {
+    public Page<QuestionPageWithCategoryAndTitle> findQuestionPageWithCategory(Pageable pageable, QuestionSearchCondition questionSearchCondition, Long memberId) {
 
         List<QuestionPageWithCategoryAndTitle> content = queryFactory.select(
-                        new QQuestionPageWithCategoryAndTitle(
-                                question.id.as("questionId"),
-                                question.title.as("questionTitle"),
-                                category.categoryTitle.as("categoryTitle"),
-                                divisionStatusAboutMemberId(loginUserDto)
-                        )).from(question).distinct()
+            Projections.fields(QuestionPageWithCategoryAndTitle.class,
+                    question.id.as("questionId"),
+                    question.title.as("questionTitle"),
+                    category.categoryTitle.as("categoryTitle")
+                )).from(question).distinct()
                 .leftJoin(question.category, category)
                 .leftJoin(question.questions, memberQuestion)
                 .leftJoin(memberQuestion.member, member)
@@ -77,9 +77,9 @@ public class QuestionRepositoryCustomImpl implements QuestionRepositoryCustom {
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
     }
 
-    private static NumberExpression<Integer> divisionStatusAboutMemberId(LoginUserDto loginUserDto) {
+    private static NumberExpression<Integer> divisionStatusAboutMemberId(Long memberId) {
         return Expressions.cases()
-                .when(memberQuestion.member.id.eq(loginUserDto.getMemberId())).then(
+                .when(memberQuestion.member.id.eq(memberId)).then(
                         Expressions.cases()
                                 .when(memberQuestion.success.ne(0)).then(1)
                                 .when(memberQuestion.fail.ne(0)).then(2)

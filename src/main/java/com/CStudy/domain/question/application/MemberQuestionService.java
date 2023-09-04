@@ -6,10 +6,8 @@ import com.CStudy.global.util.LoginUserDto;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface MemberQuestionService {
-    void findMemberAndMemberQuestionSuccess(Long memberId, Long questionId, ChoiceAnswerRequestDto choiceAnswerRequestDto);
-    void findMemberAndMemberQuestionFail(Long memberId, Long questionId, ChoiceAnswerRequestDto choiceAnswerRequestDto);
-    void findByQuestionAboutMemberIdAndQuestionIdSuccess(Long memberId, Long questionId);
-    void findByQuestionAboutMemberIdAndQuestionIdFail(Long memberId, Long questionId);
+
+    void validateAnswer(Long memberId, Long questionId, ChoiceAnswerRequestDto choiceAnswerRequestDto);
 
     QuestionAnswerDto isCorrectAnswer(Long memberId, Long questionId, ChoiceAnswerRequestDto requestDto);
 }

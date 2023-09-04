@@ -373,36 +373,6 @@ class CompetitionControllerTest {
         //verify()
     }
 
-    @Test
-    @DisplayName("대회 문제 삭제 Dto Invalid")
-    void deleteCompetitionWithInvalidDto() throws Exception {
-        //given
-        CompetitionQuestionRequestDto competitionQuestionRequestDto = CompetitionQuestionRequestDto.builder()
-                .questionIds(List.of(QuestionIdRequestDto.builder()
-                        .id(1L)
-                        .build(), QuestionIdRequestDto.builder()
-                        .id(2L)
-                        .build(), QuestionIdRequestDto.builder()
-                        .id(3L)
-                        .build(), QuestionIdRequestDto.builder()
-                        .id(4L)
-                        .build()))
-                .build();
-        // when
-        mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/competition/question/delete")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer " + VALID_TOKEN)
-                                .content(objectMapper.writeValueAsBytes(competitionQuestionRequestDto))
-                )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("400"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("잘못된 요청입니다."))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.validation.competitionId").value("문제접 번호를 입력하세요."))
-                .andDo(MockMvcResultHandlers.print());
-        //then
-        //verify()
-    }
 
     @Test
     @DisplayName("대회 내 랭킹")

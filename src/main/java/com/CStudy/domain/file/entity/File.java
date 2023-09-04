@@ -1,5 +1,6 @@
-package com.CStudy.domain.member.entity;
+package com.CStudy.domain.file.entity;
 
+import com.CStudy.domain.member.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,13 +17,8 @@ public class File {
 
     private String fileName;
 
-    @OneToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
-
     @Builder
     public File(String fileName, Member member) {
         this.fileName = fileName;
-        this.member = member;
     }
 }

@@ -32,10 +32,8 @@ import com.CStudy.global.util.LoginUserDto;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -74,32 +72,34 @@ class CompetitionServiceImplTest {
     private Long competitionId2;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
+        if (competitionId1 == null) {
+            for (int i = 0; i < 10; i++) {
+                MemberSignupRequest memberSignupRequest1 = MemberSignupRequest.builder()
+                        .email("test" + i + "@test.com")
+                        .name("테스트 유저" + i)
+                        .password("test1234!").build();
+                memberService.signUp(memberSignupRequest1);
+                Member member = memberRepository.findByEmail("test" + i + "@test.com")
+                        .orElseThrow(() -> new NotFoundMemberEmail("test@test.com"));
+                memberIds.add(member.getId());
 
-        for (int i = 0; i < 10; i++) {
-            MemberSignupRequest memberSignupRequest1 = MemberSignupRequest.builder()
-                    .email("test" + i + "@test.com")
-                    .name("테스트 유저" + i)
-                    .password("test1234!").build();
-            memberService.signUp(memberSignupRequest1);
-            Member member = memberRepository.findByEmail("test" + i + "@test.com")
-                    .orElseThrow(() -> new NotFoundMemberEmail("test@test.com"));
-            memberIds.add(member.getId());
+            }
 
+            CreateCompetitionRequestDto competitionDto = CreateCompetitionRequestDto.builder()
+                    .competitionTitle("대회 이름1")
+                    .participants(5)
+                    .competitionStart(LocalDateTime.of(3023, 5, 19, 20, 0))
+                    .competitionEnd(LocalDateTime.of(3023, 6, 19, 20, 0)).build();
+            competitionId1 = competitionService.createCompetition(competitionDto);
+
+            CreateCompetitionRequestDto competitionDto1 = CreateCompetitionRequestDto.builder()
+                    .competitionTitle("대회 이름2")
+                    .participants(5)
+                    .competitionStart(LocalDateTime.of(2022, 5, 19, 20, 0))
+                    .competitionEnd(LocalDateTime.of(2022, 6, 19, 20, 0)).build();
+            competitionId2 = competitionService.createCompetition(competitionDto1);
         }
-        CreateCompetitionRequestDto competitionDto = CreateCompetitionRequestDto.builder()
-                .competitionTitle("대회 이름1")
-                .participants(5)
-                .competitionStart(LocalDateTime.of(2024, 5, 19, 20, 0))
-                .competitionEnd(LocalDateTime.of(2024, 6, 19, 20, 0)).build();
-        competitionId1 = competitionService.createCompetition(competitionDto);
-
-        CreateCompetitionRequestDto competitionDto1 = CreateCompetitionRequestDto.builder()
-                .competitionTitle("대회 이름2")
-                .participants(5)
-                .competitionStart(LocalDateTime.of(2022, 5, 19, 20, 0))
-                .competitionEnd(LocalDateTime.of(2022, 6, 19, 20, 0)).build();
-        competitionId2 = competitionService.createCompetition(competitionDto1);
     }
 
     @Test
@@ -108,7 +108,7 @@ class CompetitionServiceImplTest {
         CompetitionResponseDto competition = competitionService.getCompetition(competitionId1);
 
         assertEquals(competition.getTitle(), "대회 이름1");
-        assertEquals(competition.getEndTime(), LocalDateTime.of(2024, 6, 19, 20, 0));
+        assertEquals(competition.getEndTime(), LocalDateTime.of(3023, 6, 19, 20, 0));
     }
 
     @Test

@@ -13,14 +13,12 @@ import com.CStudy.global.exception.member.EmailDuplication;
 import com.CStudy.global.exception.member.InvalidMatchPasswordException;
 import com.CStudy.global.exception.member.NotFoundMemberEmail;
 import com.CStudy.global.exception.member.NotFoundMemberId;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("local")
+@Transactional
 class MemberServiceImplTest {
 
     @Autowired
@@ -46,11 +45,6 @@ class MemberServiceImplTest {
     private static final String VALID_EMAIL = "test1234@email.com";
     private static final String VALID_PASSWORD = "password1234!";
 
-    @BeforeEach
-    void setUp() {
-
-    }
-
     @DisplayName("회원가입")
     @Nested
     class signup {
@@ -61,13 +55,13 @@ class MemberServiceImplTest {
             MemberSignupRequest memberSignupRequest = MemberSignupRequest.builder()
                     .email(VALID_EMAIL)
                     .password(VALID_PASSWORD)
-                    .name("김무건")
+                    .name("테스트 유저")
                     .build();
             //when
             MemberSignupResponse memberSignupResponse = memberService.signUp(memberSignupRequest);
             //Then
             assertThat(memberSignupResponse.getEmail()).isEqualTo(VALID_EMAIL);
-            assertThat(memberSignupResponse.getName()).isEqualTo("김무건");
+            assertThat(memberSignupResponse.getName()).isEqualTo("테스트 유저");
         }
 
         @Test
@@ -77,7 +71,7 @@ class MemberServiceImplTest {
             MemberSignupRequest memberSignupRequest = MemberSignupRequest.builder()
                     .email(VALID_EMAIL)
                     .password(passwordEncoder.encode(VALID_PASSWORD))
-                    .name("김무건")
+                    .name("테스트 유저")
                     .build();
             //when
             MemberSignupResponse memberSignupResponse = memberService.signUp(memberSignupRequest);
@@ -104,7 +98,7 @@ class MemberServiceImplTest {
             MemberSignupRequest memberSignupRequest = MemberSignupRequest.builder()
                     .email(VALID_EMAIL)
                     .password(VALID_PASSWORD)
-                    .name("김무건")
+                    .name("테스트 유저")
                     .build();
 
             //when Then
@@ -120,7 +114,7 @@ class MemberServiceImplTest {
             MemberSignupRequest memberSignupRequest = MemberSignupRequest.builder()
                     .email(VALID_EMAIL)
                     .password(VALID_PASSWORD)
-                    .name("김무건")
+                    .name("테스트 유저")
                     .build();
 
             //when
@@ -155,8 +149,8 @@ class MemberServiceImplTest {
                     .orElseThrow(() -> new NotFoundMemberId(1L));
             //Then
             assertThat(member.getName()).isEqualTo("관리자");
-            assertThat(member.getEmail()).isEqualTo("admin");
-            assertThat(member.getPassword()).isNotEqualTo("1234");
+            assertThat(member.getEmail()).isEqualTo("admin@admin.com");
+            assertThat(member.getPassword()).isNotEqualTo("admin1234!");
 
         }
 
@@ -171,7 +165,7 @@ class MemberServiceImplTest {
             MemberSignupRequest memberSignupRequest = MemberSignupRequest.builder()
                     .email(VALID_EMAIL)
                     .password(VALID_PASSWORD)
-                    .name("김무건")
+                    .name("테스트 유저")
                     .build();
 
             memberService.signUp(memberSignupRequest);
@@ -188,7 +182,7 @@ class MemberServiceImplTest {
             //when
             MemberLoginResponse login = memberService.login(request);
             //Then
-            assertThat(login.getName()).isEqualTo("김무건");
+            assertThat(login.getName()).isEqualTo("테스트 유저");
             assertThat(login.getAccessToken()).isNotNull();
             assertThat(login.getEmail()).isEqualTo(VALID_EMAIL);
             assertThat(login.getRefreshToken()).isNotNull();

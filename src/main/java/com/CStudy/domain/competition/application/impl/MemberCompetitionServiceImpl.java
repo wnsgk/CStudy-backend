@@ -8,12 +8,11 @@ import com.CStudy.domain.competition.repository.CompetitionRepository;
 import com.CStudy.domain.competition.repository.MemberCompetitionRepository;
 import com.CStudy.domain.member.entity.Member;
 import com.CStudy.domain.member.repository.MemberRepository;
-import com.CStudy.global.exception.competition.DuplicateMemberWithCompetition;
-import com.CStudy.global.exception.competition.NotFoundCompetitionId;
-import com.CStudy.global.exception.competition.NotFoundMemberCompetition;
-import com.CStudy.global.exception.competition.ParticipantsWereInvitedParticipateException;
+import com.CStudy.global.exception.competition.*;
 import com.CStudy.global.exception.member.NotFoundMemberId;
 import com.CStudy.global.util.LoginUserDto;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,6 +40,10 @@ public class MemberCompetitionServiceImpl implements MemberCompetitionService {
         Competition competition = competitionRepository.findByIdForUpdateOptimistic(competitionId)
                 .orElseThrow(() -> new NotFoundCompetitionId(competitionId));
 
+        if(competition.getCompetitionEnd().isBefore(LocalDateTime.now())){
+            throw new CompetitionStartException();
+        }
+
         decreaseParticipantsCountIfPossible(competition);
 
         MemberCompetition memberCompetition = MemberCompetition.builder()
@@ -52,6 +55,7 @@ public class MemberCompetitionServiceImpl implements MemberCompetitionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int getJoinMemberCount(Long competitionId) {
         List<MemberCompetition> memberCompetitions =
                 memberCompetitionRepository.findAllWithMemberAndCompetition(competitionId);
@@ -59,6 +63,7 @@ public class MemberCompetitionServiceImpl implements MemberCompetitionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MyCompetitionRankingDto myRanking(Long memberId, Long competitionId) {
 
         List<Long> finishMember = memberCompetitionRepository

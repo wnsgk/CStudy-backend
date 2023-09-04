@@ -33,7 +33,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("local")
@@ -55,11 +55,47 @@ class QuestionServiceImplTest {
     @Autowired
     private MemberQuestionRepository memberQuestionRepository;
 
+    private Long questionId;
+
+    @BeforeEach
+    void beforeCreateSet() {
+        CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
+                .category("네트워크")
+                .build();
+
+        CreateQuestionRequestDto createQuestionRequestDto = CreateQuestionRequestDto.builder()
+                .questionTitle("문제 제목")
+                .questionDesc("문제에 대한 설명")
+                .questionExplain("문제에 대한 해답")
+                .build();
+
+        List<CreateChoicesAboutQuestionDto> createChoicesAboutQuestionDto = new ArrayList<>();
+
+        for (int j = 1; j <= 5; j++) {
+            CreateChoicesAboutQuestionDto request = CreateChoicesAboutQuestionDto.builder()
+                    .number(j)
+                    .content("선택 " + j)
+                    .build();
+            if (j == 3) {
+                request.setAnswer("정답");
+            }
+            createChoicesAboutQuestionDto.add(request);
+        }
+
+        CreateQuestionAndCategoryRequestDto createQuestionAndCategoryRequestDto = CreateQuestionAndCategoryRequestDto.builder()
+                .createQuestionRequestDto(createQuestionRequestDto)
+                .categoryRequestDto(categoryRequestDto)
+                .createChoicesAboutQuestionDto(createChoicesAboutQuestionDto)
+                .build();
+
+        questionId = questionService.createQuestionChoice(createQuestionAndCategoryRequestDto);
+
+    }
+
     @Test
-    @DisplayName("문제에 대한 제목, 설명, 정답 설명")
+    @DisplayName("문제 생성")
     public void createQuestionWithChoice_Valid() throws Exception {
         //given
-        new findQuestionWithChoiceAndCategory().beforeCreateSet();
 
         Question question = questionRepository.findById(1L)
                 .orElseThrow();
@@ -71,113 +107,32 @@ class QuestionServiceImplTest {
     }
 
     @Test
-    @DisplayName("recursiveCreateQuestionChoice 테스트")
-    public void recursiveCreateQuestionChoice_Valid() {
+    @DisplayName("문제 여러개 생성2")
+    public void recursiveCreateQuestionChoice_Valid2() {
         // Given
-        CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
-                .category("네트워크")
-                .build();
-
-        CreateQuestionRequestDto createQuestionRequestDto = CreateQuestionRequestDto.builder()
-                .questionTitle("문제 제목")
-                .questionDesc("문제에 대한 설명")
-                .questionExplain("문제에 대한 해답")
-                .build();
-
-        CreateChoicesAboutQuestionDto request1 = CreateChoicesAboutQuestionDto.builder()
-                .number(1)
-                .content("선택 1")
-                .build();
-
-        CreateChoicesAboutQuestionDto request2 = CreateChoicesAboutQuestionDto.builder()
-                .number(2)
-                .content("선택 2")
-                .build();
-        CreateChoicesAboutQuestionDto request3 = CreateChoicesAboutQuestionDto.builder()
-                .number(3)
-                .content("선택 3")
-                .answer("정답")
-                .build();
-        CreateChoicesAboutQuestionDto request4 = CreateChoicesAboutQuestionDto.builder()
-                .number(4)
-                .content("선택 4")
-                .build();
-
-        List<CreateChoicesAboutQuestionDto> createChoicesAboutQuestionDto = new ArrayList<>();
-        createChoicesAboutQuestionDto.add(request1);
-        createChoicesAboutQuestionDto.add(request2);
-        createChoicesAboutQuestionDto.add(request3);
-        createChoicesAboutQuestionDto.add(request4);
-
-        CreateQuestionAndCategoryRequestDto createQuestionAndCategoryRequestDto = CreateQuestionAndCategoryRequestDto.builder()
-                .createQuestionRequestDto(createQuestionRequestDto)
-                .categoryRequestDto(categoryRequestDto)
-                .createChoicesAboutQuestionDto(createChoicesAboutQuestionDto)
-                .build();
-
-        List<CreateQuestionAndCategoryRequestDto> requestDtos = new ArrayList<>();
-        requestDtos.add(createQuestionAndCategoryRequestDto);
-
-        // When
-        questionService.recursiveCreateQuestionChoice(requestDtos);
-
-        // Then
-        List<Question> questions = questionRepository.findAll();
-        assertThat(questions).hasSize(1);
-
-        Question question = questions.get(0);
-        assertThat(question.getTitle()).isEqualTo("문제 제목");
-        assertThat(question.getDescription()).isEqualTo("문제에 대한 설명");
-        assertThat(question.getExplain()).isEqualTo("문제에 대한 해답");
-
-        List<Choice> choices = question.getChoices();
-        assertThat(choices.get(0).getContent()).isEqualTo("선택 1");
-        assertThat(choices.get(1).getContent()).isEqualTo("선택 2");
-        assertThat(choices.get(2).getContent()).isEqualTo("선택 3");
-        assertThat(choices.get(3).getContent()).isEqualTo("선택 4");
-        assertThat(choices.get(2).isAnswer()).isTrue();
-    }
-
-    @DisplayName("문제 find & category")
-    @Nested
-    class findQuestionWithChoiceAndCategory {
-
-        void beforeCreateSet() {
+        for(int i = 1; i < 100; i++) {
             CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
                     .category("네트워크")
                     .build();
 
             CreateQuestionRequestDto createQuestionRequestDto = CreateQuestionRequestDto.builder()
-                    .questionTitle("문제 제목")
-                    .questionDesc("문제에 대한 설명")
-                    .questionExplain("문제에 대한 해답")
+                    .questionTitle("문제 제목 " + i)
+                    .questionDesc("문제에 대한 설명 " + i)
+                    .questionExplain("문제에 대한 해답 " + i)
                     .build();
-
-            CreateChoicesAboutQuestionDto request1 = CreateChoicesAboutQuestionDto.builder()
-                    .number(1)
-                    .content("선택 1")
-                    .build();
-
-            CreateChoicesAboutQuestionDto request2 = CreateChoicesAboutQuestionDto.builder()
-                    .number(2)
-                    .content("선택 2")
-                    .build();
-            CreateChoicesAboutQuestionDto request3 = CreateChoicesAboutQuestionDto.builder()
-                    .number(3)
-                    .content("선택 3")
-                    .answer("정답")
-                    .build();
-            CreateChoicesAboutQuestionDto request4 = CreateChoicesAboutQuestionDto.builder()
-                    .number(4)
-                    .content("선택 4")
-                    .build();
-
 
             List<CreateChoicesAboutQuestionDto> createChoicesAboutQuestionDto = new ArrayList<>();
-            createChoicesAboutQuestionDto.add(request1);
-            createChoicesAboutQuestionDto.add(request2);
-            createChoicesAboutQuestionDto.add(request3);
-            createChoicesAboutQuestionDto.add(request4);
+
+            for (int j = 1; j <= 5; j++) {
+                CreateChoicesAboutQuestionDto request = CreateChoicesAboutQuestionDto.builder()
+                        .number(j)
+                        .content("선택 " + j)
+                        .build();
+                if (j == 3) {
+                    request.setAnswer("정답");
+                }
+                createChoicesAboutQuestionDto.add(request);
+            }
 
             CreateQuestionAndCategoryRequestDto createQuestionAndCategoryRequestDto = CreateQuestionAndCategoryRequestDto.builder()
                     .createQuestionRequestDto(createQuestionRequestDto)
@@ -188,121 +143,62 @@ class QuestionServiceImplTest {
             questionService.createQuestionChoice(createQuestionAndCategoryRequestDto);
         }
 
-        @BeforeEach
-        void setUp() {
-            beforeCreateSet();
+        // Then
+        List<Question> questions = questionRepository.findAll();
+        assertThat(questions).hasSize(100);
+    }
+    @Test
+    @DisplayName("문제 여러개 생성")
+    public void recursiveCreateQuestionChoice_Valid() {
+        // Given
+        List<CreateQuestionAndCategoryRequestDto> requestDtos = new ArrayList<>();
+
+        for(int i = 1; i < 100; i++) {
+            CategoryRequestDto categoryRequestDto = CategoryRequestDto.builder()
+                    .category("네트워크")
+                    .build();
+
+            CreateQuestionRequestDto createQuestionRequestDto = CreateQuestionRequestDto.builder()
+                    .questionTitle("문제 제목 " + i)
+                    .questionDesc("문제에 대한 설명 " + i)
+                    .questionExplain("문제에 대한 해답 " + i)
+                    .build();
+
+            List<CreateChoicesAboutQuestionDto> createChoicesAboutQuestionDto = new ArrayList<>();
+
+            for (int j = 1; j <= 5; j++) {
+                CreateChoicesAboutQuestionDto request = CreateChoicesAboutQuestionDto.builder()
+                        .number(j)
+                        .content("선택 " + j)
+                        .build();
+                if (j == 3) {
+                    request.setAnswer("정답");
+                }
+                createChoicesAboutQuestionDto.add(request);
+            }
+
+            CreateQuestionAndCategoryRequestDto createQuestionAndCategoryRequestDto = CreateQuestionAndCategoryRequestDto.builder()
+                    .createQuestionRequestDto(createQuestionRequestDto)
+                    .categoryRequestDto(categoryRequestDto)
+                    .createChoicesAboutQuestionDto(createChoicesAboutQuestionDto)
+                    .build();
+
+            requestDtos.add(createQuestionAndCategoryRequestDto);
         }
+        // When
+        questionService.recursiveCreateQuestionChoice(requestDtos);
 
-        @Test
-        @DisplayName("생성된 문제에 대한 문제 찾기 및 카테고리")
-        public void findQuestionValidWithChoiceAndCategory() throws Exception {
-            //given
-
-            //when
-            QuestionResponseDto result = questionService.findQuestionWithChoiceAndCategory(1L);
-            //Then
-            assertAll(
-                    () -> assertThat(result.getTitle()).isEqualTo("문제 제목"),
-                    () -> assertThat(result.getDescription()).isEqualTo("문제에 대한 설명"),
-                    () -> assertThat(result.getExplain()).isEqualTo("문제에 대한 해답")
-            );
-
-            assertAll(
-                    () -> assertThat(result.getChoices().get(0).getContent()).isEqualTo("선택 1"),
-                    () -> assertThat(result.getChoices().get(1).getContent()).isEqualTo("선택 2"),
-                    () -> assertThat(result.getChoices().get(2).getContent()).isEqualTo("선택 3"),
-                    () -> assertThat(result.getChoices().get(3).getContent()).isEqualTo("선택 4")
-
-            );
-
-            assertAll(
-                    () -> assertThat(result.getChoices().get(0).getNumber()).isEqualTo(1),
-                    () -> assertThat(result.getChoices().get(1).getNumber()).isEqualTo(2),
-                    () -> assertThat(result.getChoices().get(2).getNumber()).isEqualTo(3),
-                    () -> assertThat(result.getChoices().get(3).getNumber()).isEqualTo(4)
-            );
-
-            assertThat(result.getCategoryTitle()).isEqualTo("네트워크");
-        }
+        // Then
+        List<Question> questions = questionRepository.findAll();
+        assertThat(questions).hasSize(100);
     }
 
+    @DisplayName("문제 검색")
     @Nested
-    class test {
-
-        @BeforeEach
-        void setUp() {
-            new findQuestionWithChoiceAndCategory().beforeCreateSet();
-
-            MemberSignupRequest memberSignupRequest = MemberSignupRequest.builder()
-                    .email("test1234@gmail.com")
-                    .password("1234")
-                    .name("김무건")
-                    .build();
-            memberService.signUp(memberSignupRequest);
-        }
+    class findQuestionWithChoiceAndCategory {
 
         @Test
-        @DisplayName("문제 선택 - 실패")
-        public void choiceQuestionWithInValid() throws Exception {
-            //given
-            MemberLoginRequest request = MemberLoginRequest.builder()
-                    .email("test1234@gmail.com")
-                    .password("1234")
-                    .build();
-
-            MemberLoginResponse login = memberService.login(request);
-
-            Member member = memberRepository.findByEmail(login.getEmail())
-                    .orElseThrow(() -> new NotFoundMemberEmail(login.getEmail()));
-
-            LoginUserDto loginUserDto = LoginUserDto.builder()
-                    .memberId(member.getId())
-                    .build();
-
-            ChoiceAnswerRequestDto choiceAnswerRequestDto = ChoiceAnswerRequestDto.builder()
-                    .choiceNumber(1)
-                    .build();
-            //when
-            questionService.choiceQuestion(loginUserDto, 1L, choiceAnswerRequestDto);
-
-            MemberQuestion memberQuestion = memberQuestionRepository.findById(1L)
-                    .orElseThrow(RuntimeException::new);
-            //Then
-            assertThat(memberQuestion.getFail()).isEqualTo(1);
-        }
-
-        @Test
-        @DisplayName("문제 선택 - 성공")
-        public void choiceQuestionWithValid() throws Exception {
-            //given
-            MemberLoginRequest request = MemberLoginRequest.builder()
-                    .email("test1234@gmail.com")
-                    .password("1234")
-                    .build();
-
-            MemberLoginResponse login = memberService.login(request);
-
-            Member member = memberRepository.findByEmail(login.getEmail())
-                    .orElseThrow(() -> new NotFoundMemberEmail(login.getEmail()));
-
-            LoginUserDto loginUserDto = LoginUserDto.builder()
-                    .memberId(member.getId())
-                    .build();
-
-            ChoiceAnswerRequestDto choiceAnswerRequestDto = ChoiceAnswerRequestDto.builder()
-                    .choiceNumber(3)
-                    .build();
-            //when
-            questionService.choiceQuestion(loginUserDto, 1L, choiceAnswerRequestDto);
-
-            MemberQuestion memberQuestion = memberQuestionRepository.findById(1L)
-                    .orElseThrow(RuntimeException::new);
-            //Then
-            assertThat(memberQuestion.getSuccess()).isEqualTo(3);
-        }
-
-        @Test
-        @DisplayName("페이징 문제 및 카테고리")
+        @DisplayName("제목, 카테고리를 이용한 문제 검색")
         public void findPagingQuestionAndCategoryWithValid() throws Exception {
             //given
             LoginUserDto loginUserDto = LoginUserDto.builder()
@@ -314,7 +210,7 @@ class QuestionServiceImplTest {
             //Then
             Page<QuestionPageWithCategoryAndTitle> questionPageWithCategoryAndTitles = questionService.questionPageWithCategory(
                     questionSearchCondition, 0, 10,
-                    loginUserDto);
+                    loginUserDto.getMemberId());
 
             System.out.println("questionPageWithCategoryAndTitles = " + questionPageWithCategoryAndTitles);
 
@@ -326,7 +222,7 @@ class QuestionServiceImplTest {
         }
 
         @Test
-        @DisplayName("페이징 문제 및 카테고리 - 문제 제목")
+        @DisplayName("제목을 이용한 문제 검색")
         public void findPagingQuestionAndCategoryWithValidCondition() throws Exception {
             //given
             LoginUserDto loginUserDto = LoginUserDto.builder()
@@ -338,17 +234,87 @@ class QuestionServiceImplTest {
             //when
             Page<QuestionPageWithCategoryAndTitle> questionPageWithCategoryAndTitles = questionService.questionPageWithCategory(
                     questionSearchCondition, 0, 10,
-                    loginUserDto);
+                    loginUserDto.getMemberId());
 
             //Then
-
-            System.out.println("questionPageWithCategoryAndTitles = " + questionPageWithCategoryAndTitles);
-
             assertThat(questionPageWithCategoryAndTitles.stream().map(QuestionPageWithCategoryAndTitle::getQuestionTitle)
                     .findFirst().orElseThrow(RuntimeException::new)).isEqualTo("문제 제목");
+        }
 
+        @Test
+        @DisplayName("카테고리를 이용한 문제 검색")
+        public void findQuestionWithCategory() throws Exception {
+            //given
+            LoginUserDto loginUserDto = LoginUserDto.builder()
+                    .memberId(1L)
+                    .build();
+            QuestionSearchCondition questionSearchCondition = QuestionSearchCondition.builder()
+                    .categoryTitle("네트워크")
+                    .build();
+            //when
+            Page<QuestionPageWithCategoryAndTitle> questionPageWithCategoryAndTitles = questionService.questionPageWithCategory(
+                    questionSearchCondition, 0, 10,
+                    loginUserDto.getMemberId());
+
+            //Then
             assertThat(questionPageWithCategoryAndTitles.stream().map(QuestionPageWithCategoryAndTitle::getCategoryTitle)
                     .findFirst().orElseThrow(RuntimeException::new)).isEqualTo("네트워크");
         }
+    }
+
+    @Nested
+    @DisplayName("회원 문제")
+    class test {
+
+        @BeforeEach
+        void setUp() {
+            MemberSignupRequest memberSignupRequest = MemberSignupRequest.builder()
+                    .email("test1234@gmail.com")
+                    .password("1234")
+                    .name("테스트")
+                    .build();
+            memberService.signUp(memberSignupRequest);
+        }
+
+        @Test
+        @DisplayName("문제 선택 - 실패")
+        public void choiceQuestionWithInValid() throws Exception {
+            //given
+            Member member = memberRepository.findByEmail("test1234@gmail.com")
+                    .orElseThrow(() -> new NotFoundMemberEmail("test1234@gmail.com"));
+
+            ChoiceAnswerRequestDto choiceAnswerRequestDto = ChoiceAnswerRequestDto.builder()
+                    .choiceNumber(2)
+                    .build();
+            //when
+            questionService.choiceQuestion(member.getId(), questionId, choiceAnswerRequestDto);
+
+            MemberQuestion memberQuestion = memberQuestionRepository.findById(2L)
+                    .orElseThrow(RuntimeException::new);
+            //Then
+            assertFalse(memberQuestion.getSuccess());
+        }
+
+        @Test
+        @DisplayName("문제 선택 - 성공")
+        public void choiceQuestionWithValid() throws Exception {
+            //given
+            Member member = memberRepository.findByEmail("test1234@gmail.com")
+                    .orElseThrow(() -> new NotFoundMemberEmail("test1234@gmail.com"));
+
+            ChoiceAnswerRequestDto choiceAnswerRequestDto = ChoiceAnswerRequestDto.builder()
+                    .choiceNumber(3)
+                    .build();
+            //when
+            System.out.println("member.getId() = " + member.getId());
+            System.out.println("questionId = " + questionId);
+            questionService.choiceQuestion(member.getId(), questionId, choiceAnswerRequestDto);
+
+            MemberQuestion memberQuestion = memberQuestionRepository.findById(1L)
+                    .orElseThrow(RuntimeException::new);
+            //Then
+            assertTrue(memberQuestion.getSuccess());
+        }
+
     }
 }

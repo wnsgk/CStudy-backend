@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -399,10 +400,8 @@ class QuestionControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-                .andExpect(jsonPath("$.categoryTitle").value("네트워크"))
-                .andExpect(jsonPath("$.title").value("제목"))
-                .andExpect(jsonPath("$.description").value("정답"))
-                .andExpect(jsonPath("$.explain").value("설명"))
+                .andExpect(jsonPath("$.code").value("401"))
+                .andExpect(jsonPath("$.message").value("Headers에 토큰 형식의 값 찾을 수 없음"))
                 .andDo(print());
         //then
     }
@@ -415,7 +414,7 @@ class QuestionControllerTest {
 
         ChoiceAnswerRequestDto choiceAnswerRequestDto = ChoiceAnswerRequestDto.builder()
                 .choiceNumber(1)
-                .time(100L)
+                .time(LocalDateTime.now())
                 .build();
 
         QuestionAnswerDto questionAnswerDto = QuestionAnswerDto.builder()
@@ -445,7 +444,7 @@ class QuestionControllerTest {
 
         ChoiceAnswerRequestDto choiceAnswerRequestDto = ChoiceAnswerRequestDto.builder()
                 .choiceNumber(1)
-                .time(100L)
+                .time(LocalDateTime.now())
                 .build();
 
         QuestionAnswerDto questionAnswerDto = QuestionAnswerDto.builder()
@@ -487,7 +486,7 @@ class QuestionControllerTest {
         Page<QuestionPageWithCategoryAndTitle> mockPageResult = new PageImpl<>(mockQuestionList, pageable, mockQuestionList.size());
 
 
-        given(questionService.questionPageWithCategory(questionSearchCondition, 0, 10, loginUserDto))
+        given(questionService.questionPageWithCategory(questionSearchCondition, 0, 10, loginUserDto.getMemberId()))
                 .willReturn(mockPageResult);
 
 
@@ -524,7 +523,7 @@ class QuestionControllerTest {
 
         Page<QuestionPageWithCategoryAndTitle> mockPageResult = new PageImpl<>(mockQuestionList, pageable, mockQuestionList.size());
 
-        given(questionService.questionPageWithCategory(questionSearchCondition, 0, 10, loginUserDto)).willReturn(mockPageResult);
+        given(questionService.questionPageWithCategory(questionSearchCondition, 0, 10, loginUserDto.getMemberId())).willReturn(mockPageResult);
 
         // when
         mockMvc.perform(
@@ -539,21 +538,4 @@ class QuestionControllerTest {
         //verify()
     }
 
-    @Test
-    @DisplayName("게시글 삭제")
-    void deleteRequestId() throws Exception {
-        //given
-        Long id = 1L;
-        // when
-        mockMvc.perform(
-                        MockMvcRequestBuilders.delete("/api/request/{id}", id)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer " + token)
-                                .content("")
-                )
-                .andExpect(MockMvcResultMatchers.status().isNoContent())
-                .andDo(print());
-        //then
-        //verify()
-    }
 }

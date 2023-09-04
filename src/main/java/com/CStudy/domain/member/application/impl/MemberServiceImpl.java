@@ -1,7 +1,6 @@
 package com.CStudy.domain.member.application.impl;
 
 import com.CStudy.domain.aop.TimeAnnotation;
-import com.CStudy.domain.member.application.DuplicateServiceFinder;
 import com.CStudy.domain.member.application.MemberService;
 import com.CStudy.domain.member.dto.request.MemberLoginRequest;
 import com.CStudy.domain.member.dto.request.MemberPasswordChangeRequest;
@@ -51,7 +50,6 @@ public class MemberServiceImpl implements MemberService {
     private final JwtTokenizer jwtTokenizer;
     private final JavaMailSender javaMailSender;
     private final RefreshTokenService refreshTokenService;
-    private final DuplicateServiceFinder duplicateServiceFinder;
 
     @Value("${spring.mail.username}")
     private  String EMAIL;
@@ -62,8 +60,7 @@ public class MemberServiceImpl implements MemberService {
             PasswordEncoder passwordEncoder,
             JwtTokenizer jwtTokenizer,
             JavaMailSender javaMailSender,
-            RefreshTokenService refreshTokenService,
-            DuplicateServiceFinder duplicateServiceFinder
+            RefreshTokenService refreshTokenService
     ) {
         this.memberRepository = memberRepository;
         this.roleRepository = roleRepository;
@@ -71,7 +68,6 @@ public class MemberServiceImpl implements MemberService {
         this.jwtTokenizer = jwtTokenizer;
         this.javaMailSender = javaMailSender;
         this.refreshTokenService = refreshTokenService;
-        this.duplicateServiceFinder = duplicateServiceFinder;
     }
 
     /**
@@ -87,44 +83,19 @@ public class MemberServiceImpl implements MemberService {
     public MemberSignupResponse signUp(
             MemberSignupRequest request
     ) {
-        checkEmailAndNameDuplication(request);
+        duplicationWithEmail(request);
 
-        signupWithRole(Member.builder()
+        Member member = Member.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .roles(new HashSet<>())
-                .build());
+                .build();
 
-        return MemberSignupResponse.of(memberRepository.save(Member.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .name(request.getName())
-                .roles(new HashSet<>())
-                .build()));
-    }
+        signupWithRole(member);
+        memberRepository.save(member);
 
-    private void checkEmailAndNameDuplication(MemberSignupRequest request) {
-        divisionDuplicationAboutNickEmail(request);
-        divisionDuplicationAboutName(request);
-    }
-
-    private void divisionDuplicationAboutName(MemberSignupRequest request) {
-        DuplicateResponseDto name = duplicateServiceFinder.getVerifyResponseDto("name", request.getName());
-        Optional.of(name)
-                .filter(duplicateResponseDto -> duplicateResponseDto.getVerify().equals(DuplicateResult.FALSE.getDivisionResult()))
-                .ifPresent(duplicateResponseDto -> {
-                    throw new RuntimeException("중복 이름");
-                });
-    }
-
-    private void divisionDuplicationAboutNickEmail(MemberSignupRequest request) {
-        DuplicateResponseDto email = duplicateServiceFinder.getVerifyResponseDto("email", request.getEmail());
-        Optional.of(email)
-                .filter(duplicateResponseDto -> duplicateResponseDto.getVerify().equals(DuplicateResult.FALSE.getDivisionResult()))
-                .ifPresent(duplicateResponseDto -> {
-                    throw new RuntimeException("중복 이메일");
-                });
+        return MemberSignupResponse.of(member);
     }
 
     /**
@@ -240,17 +211,20 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
+    @Transactional
     private void signupWithRole(Member member) {
         Optional<Role> userRole = roleRepository.findByName(RoleEnum.CUSTOM.getRoleName());
         userRole.ifPresent(member::changeRole);
     }
 
+    @Transactional(readOnly = true)
     private void duplicationWithEmail(MemberSignupRequest request) {
         if (memberRepository.existsByEmail(request.getEmail())) {
             throw new EmailDuplication(request.getEmail());
         }
     }
 
+    @Transactional
     private MemberLoginResponse createToken(Member member) {
 
         List<String> roles = member.getRoles().stream()

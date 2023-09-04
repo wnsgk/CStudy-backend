@@ -61,6 +61,8 @@ class RequestServiceImplTest {
         Member member2 = memberRepository.findByEmail("test2@test.com")
                 .orElseThrow(() -> new NotFoundMemberEmail("test2@test.com"));
         memberId2 = member2.getId();
+        System.out.println("memberId1 = " + memberId1);
+        System.out.println("memberId2 = " + memberId2);
     }
 
     @Test
@@ -125,7 +127,7 @@ class RequestServiceImplTest {
                     .title("문제 요청"+i)
                     .description("문제 요청 내용"+i)
                     .build();
-            Long requestId = requestService.createRequest(requestDto, memberId1);
+            requestService.createRequest(requestDto, memberId1);
         }
         Pageable pageable = PageRequest.of(0, 5, Sort.by("createdAt").descending());
         Page<RequestResponseDto> requestList = requestService.getRequestList(memberId1, pageable);

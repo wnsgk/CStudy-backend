@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/api/questions").hasAuthority("ROLE_ADMIN")
+                .antMatchers("/api/request/approve").hasAuthority("ROLE_ADMIN")
                 .antMatchers("/api/workbook/update","/api/workbook/question/delete","/api/workbook/question/add","/api/workbook/create",
                         "/api/request/approve", "/api/question","/api/competition","/api/competition/question/add","/api/competition/question/delete")
                         .hasAuthority("ROLE_ADMIN")

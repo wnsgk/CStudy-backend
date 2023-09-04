@@ -14,6 +14,7 @@ import javax.persistence.*;
 public class Choice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "choice_id")
     private Long id;
 
     @Column(name = "choice_number")
@@ -28,13 +29,10 @@ public class Choice {
     private Question question;
 
     @Builder
-    public Choice(Long id, int number, String content, boolean answer, Question question) {
-        this.id = id;
+    public Choice(int number, String content, boolean answer, Question question) {
         this.number = number;
         this.content = content;
         this.answer = answer;
         this.question = question;
     }
-
-
 }

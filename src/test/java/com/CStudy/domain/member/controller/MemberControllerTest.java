@@ -1,6 +1,6 @@
 package com.CStudy.domain.member.controller;
 
-import com.CStudy.domain.member.application.FileService;
+import com.CStudy.domain.file.application.FileService;
 import com.CStudy.domain.member.application.MemberService;
 import com.CStudy.domain.member.dto.request.MemberLoginRequest;
 import com.CStudy.domain.member.dto.request.MemberPasswordChangeRequest;

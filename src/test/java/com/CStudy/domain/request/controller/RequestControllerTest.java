@@ -81,7 +81,7 @@ class RequestControllerTest {
                 .memberId(1L)
                 .description("설명")
                 .createAt(now)
-                .memberName("김무건")
+                .memberName("테스트유저")
                 .flag(false)
                 .build());
 
@@ -96,7 +96,7 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$.title").value("제목"))
                 .andExpect(jsonPath("$.memberId").value(1L))
                 .andExpect(jsonPath("$.description").value("설명"))
-                .andExpect(jsonPath("$.memberName").value("김무건"))
+                .andExpect(jsonPath("$.memberName").value("테스트유저"))
                 .andExpect(jsonPath("$.flag").value(false))
                 .andDo(MockMvcResultHandlers.print());
         //then
@@ -189,10 +189,10 @@ class RequestControllerTest {
         //given
         LocalDateTime now = LocalDateTime.now();
         List<RequestResponseDto> mockQuestionList = new ArrayList<>();
-        mockQuestionList.add(new RequestResponseDto(1L, true, "tcp", "설명", 1L, "김무건", now));
-        mockQuestionList.add(new RequestResponseDto(1L, true, "udp", "설명", 1L, "김무건", now));
-        mockQuestionList.add(new RequestResponseDto(1L, false, "객체지향", "설명", 1L, "김무건", now));
-        mockQuestionList.add(new RequestResponseDto(1L, false, "스레드", "설명", 1L, "김무건", now));
+        mockQuestionList.add(new RequestResponseDto(1L, true, "tcp", "설명", 1L, "테스트유저", now));
+        mockQuestionList.add(new RequestResponseDto(1L, true, "udp", "설명", 1L, "테스트유저", now));
+        mockQuestionList.add(new RequestResponseDto(1L, false, "객체지향", "설명", 1L, "테스트유저", now));
+        mockQuestionList.add(new RequestResponseDto(1L, false, "스레드", "설명", 1L, "테스트유저", now));
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -218,10 +218,10 @@ class RequestControllerTest {
         //given
         LocalDateTime now = LocalDateTime.now();
         List<RequestResponseDto> mockQuestionList = new ArrayList<>();
-        mockQuestionList.add(new RequestResponseDto(1L, true, "tcp", "설명", 1L, "김무건", now));
-        mockQuestionList.add(new RequestResponseDto(1L, true, "udp", "설명", 1L, "김무건", now));
-        mockQuestionList.add(new RequestResponseDto(1L, false, "객체지향", "설명", 1L, "김무건", now));
-        mockQuestionList.add(new RequestResponseDto(1L, false, "스레드", "설명", 1L, "김무건", now));
+        mockQuestionList.add(new RequestResponseDto(1L, true, "tcp", "설명", 1L, "테스트유저", now));
+        mockQuestionList.add(new RequestResponseDto(1L, true, "udp", "설명", 1L, "테스트유저", now));
+        mockQuestionList.add(new RequestResponseDto(1L, false, "객체지향", "설명", 1L, "테스트유저", now));
+        mockQuestionList.add(new RequestResponseDto(1L, false, "스레드", "설명", 1L, "테스트유저", now));
 
         Pageable pageable = PageRequest.of(0, 10);
 

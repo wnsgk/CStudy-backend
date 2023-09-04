@@ -99,6 +99,7 @@ class WorkbookServiceImplTest {
         Pageable pageable = PageRequest.of(0, 5, Sort.by("createdAt").descending());
         Page<WorkbookResponseDto> workbookList =
                 workbookService.getWorkbookList(pageable, null, null, null);
+
         for (int i = 10; i > 5; i--) {
             assertEquals(workbookList.getContent().get(10-i).getTitle(), "문제집 제목"+i);
         }

@@ -114,11 +114,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public void updateFlag(FlagRequestDto flagDto) {
-        Optional.of(flagDto)
-                .filter(dto -> dto.getId() != 1)
-                .ifPresent(dto -> {
-                    throw new RuntimeException("권한이 일치하지 않습니다.");
-                });
+
         Request request = requestRepository.findById(flagDto.getId())
                 .orElseThrow(() -> new NotFoundRequest(flagDto.getId()));
         request.updateFlag(flagDto.isFlag());

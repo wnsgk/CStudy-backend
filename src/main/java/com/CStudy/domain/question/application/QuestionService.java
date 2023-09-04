@@ -11,13 +11,13 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface QuestionService {
-    void createQuestionChoice(CreateQuestionAndCategoryRequestDto createChoicesAboutQuestionDto);
+    Long createQuestionChoice(CreateQuestionAndCategoryRequestDto createChoicesAboutQuestionDto);
 
     void recursiveCreateQuestionChoice(List<CreateQuestionAndCategoryRequestDto> requestDtos);
 
     QuestionResponseDto findQuestionWithChoiceAndCategory(Long questionId);
 
-    void choiceQuestion(LoginUserDto loginUserDto, Long questionId, ChoiceAnswerRequestDto choiceNumber);
+    void choiceQuestion(Long memberId, Long questionId, ChoiceAnswerRequestDto choiceNumber);
 
-    Page<QuestionPageWithCategoryAndTitle>questionPageWithCategory(QuestionSearchCondition searchCondition, int page, int size, LoginUserDto loginUserDto);
+    Page<QuestionPageWithCategoryAndTitle>questionPageWithCategory(QuestionSearchCondition searchCondition, int page, int size, Long memberId);
 }

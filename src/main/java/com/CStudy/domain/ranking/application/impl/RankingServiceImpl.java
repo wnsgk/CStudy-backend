@@ -10,6 +10,8 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,22 +38,13 @@ public class RankingServiceImpl implements com.CStudy.domain.ranking.application
 
         List<Member> memberList = memberRepository.findAllWithQuestions();
 
-        Map<Long, Long> memberSolveTimeMap = memberList.stream()
-                .collect(Collectors.toMap(Member::getId, this::calculateSolveTime));
-
         ZSetOperations<String, String> stringStringZSetOperations = redisTemplate.opsForZSet();
 
         memberList.forEach(member -> {
-            double rankingPoint = member.getRankingPoint();
-            stringStringZSetOperations.add("ranking", member.getName(), rankingPoint);
+            int solve = member.getSolve();
+            stringStringZSetOperations.add("ranking", member.getName(), solve);
         });
 
         return new ArrayList<>(Objects.requireNonNull(stringStringZSetOperations.reverseRangeWithScores("ranking", 0, 9), "Ranking Board Data null"));
-    }
-
-    private long calculateSolveTime(Member member) {
-        return member.getQuestions().stream()
-                .mapToLong(MemberQuestion::getSolveTime)
-                .sum();
     }
 }

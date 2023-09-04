@@ -1,7 +1,7 @@
-package com.CStudy.domain.member.application.impl;
+package com.CStudy.domain.file.application.impl;
 
-import com.CStudy.domain.member.application.FileService;
-import com.CStudy.domain.member.entity.File;
+import com.CStudy.domain.file.application.FileService;
+import com.CStudy.domain.file.entity.File;
 import com.CStudy.domain.member.entity.Member;
 import com.CStudy.domain.member.repository.FileRepository;
 import com.CStudy.domain.member.repository.MemberRepository;

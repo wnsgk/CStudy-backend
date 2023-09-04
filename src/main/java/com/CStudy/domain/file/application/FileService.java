@@ -1,4 +1,4 @@
-package com.CStudy.domain.member.application;
+package com.CStudy.domain.file.application;
 
 import com.CStudy.global.util.LoginUserDto;
 import org.springframework.web.multipart.MultipartFile;

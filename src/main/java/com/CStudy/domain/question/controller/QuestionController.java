@@ -112,7 +112,7 @@ public class QuestionController {
             @IfLogin LoginUserDto loginUserDto
 
     ) {
-        questionService.choiceQuestion(loginUserDto, questionId, choiceNumber);
+        questionService.choiceQuestion(loginUserDto.getMemberId(), questionId, choiceNumber);
         return memberQuestionService.isCorrectAnswer(loginUserDto.getMemberId(), questionId, choiceNumber);
     }
 
@@ -130,10 +130,9 @@ public class QuestionController {
             @Parameter(name = "page", description = "페이징 default 0")
             @RequestParam(value = "page", defaultValue = "0", required = false) int page,
             @Parameter(name = "size", description = "페이징 default 10")
-            @RequestParam(value = "size", defaultValue = "10", required = false) int size,
-            @IfLogin LoginUserDto loginUserDto
+            @RequestParam(value = "size", defaultValue = "10", required = false) int size
     ) {
-        return questionService.questionPageWithCategory(searchCondition, page, size, loginUserDto);
+        return questionService.questionPageWithCategory(searchCondition, page, size, null);
     }
 
     @Operation(summary = "내가 푼 문제 조회", description = "내가 푼 문제 조회")
@@ -151,6 +150,6 @@ public class QuestionController {
         QuestionSearchCondition condition = QuestionSearchCondition.builder()
                 .memberId(loginUserDto.getMemberId())
                 .build();
-        return questionService.questionPageWithCategory(condition, page, size, loginUserDto);
+        return questionService.questionPageWithCategory(condition, page, size, loginUserDto.getMemberId());
     }
 }

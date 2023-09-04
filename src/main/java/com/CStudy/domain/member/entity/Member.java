@@ -1,12 +1,14 @@
 package com.CStudy.domain.member.entity;
 
 import com.CStudy.domain.competition.entity.MemberCompetition;
+import com.CStudy.domain.file.entity.File;
 import com.CStudy.domain.notice.entitiy.Notice;
 import com.CStudy.domain.question.dto.request.ChoiceAnswerRequestDto;
 import com.CStudy.domain.question.entity.MemberQuestion;
 import com.CStudy.domain.request.entity.Request;
 import com.CStudy.domain.role.entity.Role;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +37,11 @@ public class Member {
     @Column(name = "member_name")
     private String name;
 
-    private double rankingPoint = 0L;
+    private Integer solve;
+    private LocalDateTime lastSolveTime;
 
-    @OneToOne(mappedBy = "member")
+    @OneToOne
+    @JoinColumn(name = "file_id")
     private File file;
 
     @Version
@@ -85,12 +89,9 @@ public class Member {
         roles.add(role);
     }
 
-    public void addRankingPoint(ChoiceAnswerRequestDto choiceAnswerRequestDto) {
-        rankingPoint += 3L + (1 - (choiceAnswerRequestDto.getTime() / 1000.0));
-    }
-
-    public void minusRankingPoint(double choiceAnswerRequestDto) {
-        rankingPoint -= 2L;
+    public void addSolve(int count) {
+        this.solve += count;
+        this.lastSolveTime = LocalDateTime.now();
     }
 
     @Builder
@@ -99,6 +100,8 @@ public class Member {
         this.password = password;
         this.name = name;
         this.roles = roles;
+        this.solve = 0;
+        this.lastSolveTime = LocalDateTime.now();
     }
 
     public void addRequest(Request request) {

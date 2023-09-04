@@ -16,10 +16,10 @@ import com.CStudy.domain.question.entity.Question;
 import com.CStudy.domain.question.repository.CategoryRepository;
 import com.CStudy.domain.question.repository.QuestionRepository;
 import com.CStudy.global.exception.category.NotFoundCategoryTile;
-import com.CStudy.global.exception.question.NotFoundQuestionId;
 import com.CStudy.global.exception.question.NotFoundQuestionWithChoicesAndCategoryById;
 import com.CStudy.global.redis.RedisPublisher;
 import com.CStudy.global.util.LoginUserDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -38,6 +38,7 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final CategoryRepository categoryRepository;
@@ -45,15 +46,6 @@ public class QuestionServiceImpl implements QuestionService {
     private final MemberQuestionService memberQuestionService;
     private final RedisPublisher redisPublisher;
     private final JdbcTemplate jdbcTemplate;
-
-    public QuestionServiceImpl(QuestionRepository questionRepository, CategoryRepository categoryRepository, ChoiceRepository choiceRepository, MemberQuestionService memberQuestionService, RedisPublisher redisPublisher, JdbcTemplate jdbcTemplate) {
-        this.questionRepository = questionRepository;
-        this.categoryRepository = categoryRepository;
-        this.choiceRepository = choiceRepository;
-        this.memberQuestionService = memberQuestionService;
-        this.redisPublisher = redisPublisher;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final String COLLECT_ANSWER = "정답";
 
@@ -67,7 +59,7 @@ public class QuestionServiceImpl implements QuestionService {
      */
     @Override
     @Transactional
-    public void createQuestionChoice(CreateQuestionAndCategoryRequestDto requestDto) {
+    public Long createQuestionChoice(CreateQuestionAndCategoryRequestDto requestDto) {
 
         List<Choice> choices = new ArrayList<>();
 
@@ -82,13 +74,17 @@ public class QuestionServiceImpl implements QuestionService {
             boolean answer = isCollectAnswer(choiceDto.getAnswer());
 
             Choice choice = createChoice(choiceDto, question, answer);
-
+            if(answer) {
+                question.setAnswer(choiceDto.getNumber());
+            }
             choices.add(choice);
         }
 
         question.setChoices(choices);
         questionRepository.save(question);
         choiceRepository.saveAll(new ArrayList<>(choices));
+
+        return question.getId();
     }
 
     /**
@@ -150,6 +146,7 @@ public class QuestionServiceImpl implements QuestionService {
             });
         }
     }
+
     private Long getCategoryIdByTitle(String categoryTitle) {
         String sql = "SELECT category_id FROM category WHERE category_title = ?";
         return jdbcTemplate.queryForObject(sql, Long.class, categoryTitle);
@@ -159,7 +156,6 @@ public class QuestionServiceImpl implements QuestionService {
         String sql = "SELECT question_id FROM question WHERE question_title = ?";
         return jdbcTemplate.queryForObject(sql, Long.class, questionTitle);
     }
-
 
     @Override
     @Transactional
@@ -175,35 +171,16 @@ public class QuestionServiceImpl implements QuestionService {
      * After inquiring about a single question, select the correct answer for the 4-point multiple question.
      * Save the correct or incorrect answers afterwards.
      *
-     * @param loginUserDto 로그인 회원의 정보를 저장
+     * @param memberId 로그인 회원의 id
      * @param questionId 단일 회원의 질문 아이디
      * @param choiceNumber 문제에 대한 정답을 선택을 한다.
      */
     @Override
     @Transactional
-    public void choiceQuestion(LoginUserDto loginUserDto, Long questionId, ChoiceAnswerRequestDto choiceNumber) {
+    public void choiceQuestion(Long memberId, Long questionId, ChoiceAnswerRequestDto choiceNumber) {
 
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(()->new NotFoundQuestionId(questionId));
+        memberQuestionService.validateAnswer(memberId, questionId, choiceNumber);
 
-        List<Choice> choices = question.getChoices();
-        choices.stream()
-                .filter(Choice::isAnswer)
-                .forEach(choice -> {
-                    if (choice.getNumber() == choiceNumber.getChoiceNumber()) {
-                        memberQuestionService.findMemberAndMemberQuestionSuccess(
-                                loginUserDto.getMemberId(),
-                                questionId,
-                                choiceNumber
-                        );
-                    } else {
-                        memberQuestionService.findMemberAndMemberQuestionFail(
-                                loginUserDto.getMemberId(),
-                                questionId,
-                                choiceNumber
-                        );
-                    }
-                });
         redisPublisher.publish(ChannelTopic.of("ranking-invalidation"), "ranking");
     }
 
@@ -215,7 +192,7 @@ public class QuestionServiceImpl implements QuestionService {
      * @param searchCondition Select 조건
      * @param page            페이징 페이지
      * @param size            페이징 사이즈
-     * @param loginUserDto
+     * @param memberId        memberId
      * @return questionRepository
      */
     @Override
@@ -224,10 +201,10 @@ public class QuestionServiceImpl implements QuestionService {
             QuestionSearchCondition searchCondition,
             int page,
             int size,
-            LoginUserDto loginUserDto
+            Long memberId
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return questionRepository.findQuestionPageWithCategory(pageable, searchCondition, loginUserDto);
+        return questionRepository.findQuestionPageWithCategory(pageable, searchCondition, memberId);
     }
 
     private Question createQuestion(

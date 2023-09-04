@@ -63,9 +63,7 @@ public class RequestController {
             @Parameter(hidden = true)
             @IfLogin LoginUserDto loginUser
     ) {
-        if(loginUser.getRoles().contains("ROLE_ADMIN")) {
-            requestService.updateFlag(flagDto);
-        }
+        requestService.updateFlag(flagDto);
     }
 
     @Operation(summary = "게시판 글 조회", description = "게시글 id를 이용해 게시글을 조회")

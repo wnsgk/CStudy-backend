@@ -29,6 +29,7 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+        #dialect: com.CStudy.global.config.MySQL8DialectCustom
   mail:
     host: smtp.naver.com
     port: 465
