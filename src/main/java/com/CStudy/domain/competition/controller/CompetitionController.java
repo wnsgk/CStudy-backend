@@ -181,7 +181,8 @@ public class CompetitionController {
             @Parameter(description = "대회 id")
             @PathVariable Long id
     ) {
-        return competitionService.getCompetitionRanking(id, pageable);
+        boolean finish = competitionService.checkCompetitionTime(id);
+        return competitionService.getCompetitionRanking(id, pageable, finish);
     }
 
     @Operation(summary = "대회 내 랭킹", description = "대회에서 내 랭킹 조회")

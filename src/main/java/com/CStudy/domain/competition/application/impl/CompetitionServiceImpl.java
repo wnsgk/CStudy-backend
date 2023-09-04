@@ -21,6 +21,8 @@ import com.CStudy.global.exception.competition.CompetitionStartException;
 import com.CStudy.global.exception.competition.NotFoundCompetitionId;
 import com.CStudy.global.util.LoginUserDto;
 import java.util.List;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -129,7 +131,8 @@ public class CompetitionServiceImpl implements CompetitionService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<CompetitionRankingResponseDto> getCompetitionRanking(Long competitionId, Pageable pageable) {
+    @Cacheable(value = "competition", key = "#competitionId", condition = "#finish")
+    public Page<CompetitionRankingResponseDto> getCompetitionRanking(Long competitionId, Pageable pageable, boolean finish) {
         Competition competition = competitionRepository.findById(competitionId)
                 .orElseThrow(() -> new NotFoundCompetitionId(competitionId));
         Page<MemberCompetition> memberRanking = memberCompetitionRepository.findByCompetition(competition, pageable);
@@ -176,23 +179,27 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     @Override
-    public void checkCompetitionTime(Long competitionId) {
+    public boolean checkCompetitionTime(Long competitionId) {
         Competition competition = competitionRepository.findById(competitionId)
                 .orElseThrow(CompetitionStartException::new);
         checkTimeAfter(competition.getCompetitionStart());
         checkTimeBefore(competition.getCompetitionEnd());
+
+        return true;
     }
 
-    private void checkTimeBefore(LocalDateTime time){
+    private boolean checkTimeBefore(LocalDateTime time){
         if(LocalDateTime.now().isAfter(time)){
             throw new CompetitionStartException();
         }
+        return true;
     }
 
-    private void checkTimeAfter(LocalDateTime time){
+    private boolean checkTimeAfter(LocalDateTime time){
         if(LocalDateTime.now().isBefore(time)){
             throw new CompetitionStartException();
         }
+        return true;
     }
 
 }

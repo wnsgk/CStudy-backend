@@ -271,13 +271,10 @@ class CompetitionServiceImplTest {
 
             Pageable pageable = PageRequest.of(0, 5);
             Page<CompetitionRankingResponseDto> competitionRanking =
-                    competitionService.getCompetitionRanking(competitionId1, pageable);
+                    competitionService.getCompetitionRanking(competitionId1, pageable, false);
 
             assertEquals(competitionRanking.getTotalElements(), 4);
         }
-
-
-
 
         public void scoring(Long memberId, int choice) {
             List<CompetitionAnswerRequestDto> questionDto = new ArrayList<>();

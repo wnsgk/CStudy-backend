@@ -18,12 +18,12 @@ public interface CompetitionService {
 
     Page<CompetitionListResponseDto> getCompetitionList(boolean finish, Pageable pageable);
 
-    Page<CompetitionRankingResponseDto> getCompetitionRanking(Long id, Pageable pageable);
+    Page<CompetitionRankingResponseDto> getCompetitionRanking(Long id, Pageable pageable, boolean finish);
 
     List<CompetitionQuestionDto> getCompetitionQuestion(Long competitionId, LoginUserDto loginUserDto);
 
     void addCompetitionQuestion(CompetitionQuestionRequestDto requestDto);
     void deleteCompetitionQuestion(CompetitionQuestionRequestDto requestDto);
 
-    void checkCompetitionTime(Long competitionId);
+    boolean checkCompetitionTime(Long competitionId);
 }

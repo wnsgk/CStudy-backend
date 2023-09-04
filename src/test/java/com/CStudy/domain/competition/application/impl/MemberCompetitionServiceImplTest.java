@@ -54,6 +54,8 @@ class MemberCompetitionServiceImplTest {
 
     @Autowired
     private OptimisticFacade optimisticFacade;
+    @Autowired
+    private WorkbookRepository workbookRepository;
 
     private static final String EMAIL = "test1213@email.com";
     private static final String PASSWORD = "test1234!";
@@ -176,6 +178,6 @@ class MemberCompetitionServiceImplTest {
 
         assertThat(competition.getParticipants()).isEqualTo(0);
         competitionRepository.deleteAll();
-
+        workbookRepository.deleteAll();
     }
 }
