@@ -32,7 +32,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
 
-        String email = "google_" + oAuth2User.getAttributes().get("email");
+        String email = (String) oAuth2User.getAttributes().get("email");
         String name = (String) oAuth2User.getAttributes().get("name");
         Optional<Member> memberOption = memberRepository.findByEmail(email);
 

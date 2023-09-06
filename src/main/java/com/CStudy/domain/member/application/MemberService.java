@@ -9,6 +9,7 @@ import com.CStudy.domain.member.dto.response.MemberSignupResponse;
 import com.CStudy.domain.member.dto.response.MyPageResponseDto;
 import com.CStudy.domain.member.entity.Member;
 import org.springframework.mail.MailException;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 
@@ -25,5 +26,5 @@ public interface MemberService {
 
     void changePassword(MemberPasswordChangeRequest request, Long id);
 
-    String sendEmail(String recipientEmail) throws MailException, MessagingException;
+    void duplicationWithEmail(String email);
 }

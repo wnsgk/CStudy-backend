@@ -52,7 +52,7 @@ public class SecurityConfig {
                         "/api/competition/result/**", "/api/competition/question/**")
                         .hasAnyAuthority("ROLE_CUSTOM", "ROLE_ADMIN")
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                .mvcMatchers("/api/signup","/api/login","/api/logout","/email","/name","/api/email").permitAll()
+                .mvcMatchers("/api/signup","/api/login","/api/logout","/email","/name","/api/email", "/api/email/verification").permitAll()
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(customAuthenticationEntryPoint)
