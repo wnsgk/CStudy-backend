@@ -56,7 +56,6 @@ public class QuestionRepositoryCustomImpl implements QuestionRepositoryCustom {
                         questionTitleEq(questionSearchCondition.getQuestionTitle()),
                         categoryTitleEq(questionSearchCondition.getCategoryTitle()),
                         memberIdEq(questionSearchCondition.getMemberId()),
-                        statusEq(questionSearchCondition.getStatus()),
                         question.category.id.eq(category.id)
                 )
                 .offset(pageable.getOffset())
@@ -75,18 +74,6 @@ public class QuestionRepositoryCustomImpl implements QuestionRepositoryCustom {
                         question.category.id.eq(category.id)
                 );
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
-    }
-
-    private static NumberExpression<Integer> divisionStatusAboutMemberId(Long memberId) {
-        return Expressions.cases()
-                .when(memberQuestion.member.id.eq(memberId)).then(
-                        Expressions.cases()
-                                .when(memberQuestion.success.ne(0)).then(1)
-                                .when(memberQuestion.fail.ne(0)).then(2)
-                                .otherwise(Expressions.constant(0))
-                )
-                .otherwise(Expressions.constant(0))
-                .as("status");
     }
 
 
@@ -127,16 +114,6 @@ public class QuestionRepositoryCustomImpl implements QuestionRepositoryCustom {
         return memberId != null ? member.id.eq(memberId) : null;
     }
 
-    private BooleanExpression statusEq(Integer status) {
-        if (status != null) {
-            if (status.equals(1)) {
-                return memberQuestion.success.ne(0);
-            } else if (status.equals(2)) {
-                return memberQuestion.fail.ne(0);
-            }
-        }
-        return null;
-    }
 
 
 }

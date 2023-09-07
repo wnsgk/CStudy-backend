@@ -65,6 +65,8 @@ public class Member {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<Notice> notices = new ArrayList<>();
 
+    private LocalDateTime lastNoticeTime;
+
     @OneToMany(
             mappedBy = "member",
             fetch = FetchType.LAZY,
@@ -106,5 +108,9 @@ public class Member {
 
     public void addRequest(Request request) {
         this.requests.add(request);
+    }
+
+    public void updateLastNotice(LocalDateTime lastNoticeTime){
+        this.lastNoticeTime = lastNoticeTime;
     }
 }

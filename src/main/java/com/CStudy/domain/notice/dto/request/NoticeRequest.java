@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NoticeSearchRequestDto {
-
-    private String title;
+public class NoticeRequest {
     private String content;
-    private LocalDateTime createdDate;
-
+    private Long questionId;
+    private LocalDateTime noticeTime;
 }

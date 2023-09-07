@@ -1,5 +1,7 @@
 package com.CStudy.domain.notice.dto.response;
 
+import com.CStudy.domain.notice.dto.request.NoticeRequest;
+import com.CStudy.domain.notice.entitiy.Notice;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,16 +12,15 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
+@AllArgsConstructor
 public class NoticeResponseDto {
-    private String title;
-    private String content;
-    private LocalDateTime createDate;
+    private Long questionId;
+    private LocalDateTime noticeTime;
 
-    @QueryProjection
-    public NoticeResponseDto(String title, String content, LocalDateTime createDate) {
-        this.title = title;
-        this.content = content;
-        this.createDate = createDate;
+    public static NoticeResponseDto of(Notice notice){
+        return NoticeResponseDto.builder()
+                .questionId(notice.getQuestion().getId())
+                .noticeTime(notice.getNoticeTime())
+                .build();
     }
 }

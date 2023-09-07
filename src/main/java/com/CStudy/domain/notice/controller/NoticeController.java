@@ -1,19 +1,18 @@
 package com.CStudy.domain.notice.controller;
 
 import com.CStudy.domain.notice.application.NoticeService;
-import com.CStudy.domain.notice.dto.request.NoticeSaveRequestDto;
-import com.CStudy.domain.notice.dto.request.NoticeSearchRequestDto;
-import com.CStudy.domain.notice.dto.request.NoticeUpdateRequestDto;
+import com.CStudy.domain.notice.dto.request.NoticeRequest;
+import com.CStudy.domain.notice.dto.response.NewNoticeResponse;
 import com.CStudy.domain.notice.dto.response.NoticeResponseDto;
 import com.CStudy.global.util.IfLogin;
 import com.CStudy.global.util.LoginUserDto;
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @Slf4j
 @RestController
@@ -26,35 +25,41 @@ public class NoticeController {
         this.noticeService = noticeService;
     }
 
+    @PostMapping("/save")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createNotice(
+            @IfLogin LoginUserDto loginUserDto,
+            @RequestBody NoticeRequest request
+    ) {
+        noticeService.saveNotice(request, loginUserDto.getMemberId());
+    }
+
+    @GetMapping("/new")
+    @ResponseStatus(HttpStatus.OK)
+    public NewNoticeResponse getNewNotice (
+            @IfLogin LoginUserDto loginUserDto
+    ) {
+        Integer count = noticeService.getNewNoticesCount(loginUserDto.getMemberId());
+
+        return NewNoticeResponse.builder()
+                .num(count)
+                .build();
+    }
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<NoticeResponseDto> findNoticeWithPage(
-            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-            @RequestParam(value = "size", defaultValue = "10", required = false) int size,
-            NoticeSearchRequestDto noticeSearchRequestDto
+            @IfLogin LoginUserDto loginUserDto,
+            @PageableDefault(sort = {"noticeTime"}, direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return noticeService.findNoticePage(size, page, noticeSearchRequestDto);
+        return noticeService.getNotices(loginUserDto.getMemberId(), pageable);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void saveNotice(@IfLogin LoginUserDto loginUserDto, @Valid @RequestBody NoticeSaveRequestDto noticeSaveRequestDto) {
-        noticeService.saveNotice(noticeSaveRequestDto, loginUserDto);
-    }
-
-    @PutMapping("/{noticeId}")
-    @ResponseStatus(HttpStatus.OK)
-    public void updateNotice(
-            @PathVariable Long noticeId,
-            @RequestBody NoticeUpdateRequestDto noticeUpdateRequestDto,
-            @IfLogin LoginUserDto loginUserDto
-    ) {
-        noticeService.updateNotice(noticeId, noticeUpdateRequestDto, loginUserDto);
-    }
 
     @DeleteMapping("/{noticeId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNotice(@PathVariable Long noticeId, @IfLogin LoginUserDto loginUserDto) {
-        noticeService.deleteNotice(noticeId, loginUserDto);
+        noticeService.deleteNotice(noticeId, loginUserDto.getMemberId());
     }
+
 }

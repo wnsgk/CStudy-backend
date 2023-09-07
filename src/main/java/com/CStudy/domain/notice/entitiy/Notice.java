@@ -2,21 +2,21 @@ package com.CStudy.domain.notice.entitiy;
 
 import com.CStudy.domain.member.entity.BaseEntity;
 import com.CStudy.domain.member.entity.Member;
-import com.CStudy.domain.notice.dto.request.NoticeUpdateRequestDto;
+import com.CStudy.domain.question.entity.Question;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
-public class Notice extends BaseEntity {
+@AllArgsConstructor
+public class Notice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "notice_title",nullable = false)
-    private String title;
 
     @Column(name = "notice_content", nullable = false)
     private String content;
@@ -25,25 +25,23 @@ public class Notice extends BaseEntity {
     @ManyToOne(optional = false)
     private Member member;
 
+    @JoinColumn(name = "question_id")
+    @ManyToOne
+    private Question question;
+
+    private LocalDateTime noticeTime;
+
     @Builder
     public Notice(
-            Long id,
-            String title,
             String content,
-            Member member
+            Member member,
+            Question question,
+            LocalDateTime noticeTime
     ) {
-        this.id = id;
-        this.title = title;
         this.content = content;
         this.member = member;
+        this.question = question;
+        this.noticeTime = noticeTime;
     }
 
-    protected Notice() {
-
-    }
-
-    public void updateNotice(NoticeUpdateRequestDto noticeUpdateRequestDto) {
-        this.title = noticeUpdateRequestDto.getTitle();
-        this.content = noticeUpdateRequestDto.getContent();
-    }
 }
